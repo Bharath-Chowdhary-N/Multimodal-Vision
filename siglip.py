@@ -37,7 +37,17 @@ class SiglipVisionTransformer(nn.Module):
     def __init__(self, config: SiglipVisionConfig):
         super().__init__()
         self.config = config
+        self.embeddings = SiglipVisionEmbeddings(config)
+        self.encoder = SiglipVisionEncoder(config)
+        self.layernorm = nn.LayerNorm(config.hidden_size, eps=config.layer_norm_eps)
+        self.pooler = SiglipVisionPooler(config)
+
+class SiglipVisionModel(nn.Module):
+    def __init__(self, config: SiglipVisionConfig):
+        super().__init__()
+        self.config = config
         self.vision_model = SiglipVisionTransformer(config) #initialize a vision transformer with this config
     
     def forward(self, pixel_values) -> Tuple:
+        # (Batch, Channel, Height, Width) : --> (Batch, Num_paches, embdeing_size) since (H,W,C => N , P^2*C)
         return self.vision_model(pixel_values) #forward pass
